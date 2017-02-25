@@ -1,0 +1,33 @@
+{
+  "configuration" : {
+    "connection"  : {
+      "url" : "tcp://127.0.0.1:32771",
+      "username"  : "root",
+      "password"  : "root",
+      "schema"    : "new_schema"
+    },
+    "schema"  : {
+      "tables"  : [
+        {
+          "name": "plain_table",
+          "columns": [
+            {
+              "field" : "index",
+              "column" : "idx",
+              "primary" : true,
+              "class_type" : "int",
+              "database_type": "int(11)"
+            },
+            {
+              "field" : "text",
+              "column" : "text",
+              "primary" : false,
+              "class_type": "std::string",
+              "database_type": "varchar(45)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
