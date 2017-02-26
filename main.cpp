@@ -21,7 +21,7 @@ int main()
   plain_table pt;
   cout << pt.class_name() << endl;
   pt.set_value("index", 363);
-  pt.set_value("text", "text333");
+  pt.set_value("text", "updated");
   conn.save(pt);
 
   exit(EXIT_SUCCESS);

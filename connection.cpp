@@ -4,7 +4,7 @@
 
 #include <cppconn/prepared_statement.h>
 #include "connection.h"
-#include "configuration_keys.h"
+
 namespace hypernate {
     sql::Driver* connection::_driver = get_driver_instance();
 
@@ -55,20 +55,70 @@ namespace hypernate {
       return sql;
     }
 
-    bool connection::save(const persistent_object &object)
+    const string connection::make_update_sql(const persistent_object& object) {
+      auto table_name = object.class_name();
+      string sql = "UPDATE `" + _schema + "`.`" + table_name + "` SET ";
+      string primary_field = "";
+      if (primary_field_name(object, primary_field) == false) {
+        return "";
+      }
+
+      for(auto &col : tables.at(table_name)) {
+        auto field_name = col.at(key_col_field);
+        if (field_name.compare(primary_field) != 0) {
+          sql.append(' ' + column_name(table_name, field_name) + '=' + object.get_value(field_name).dump() + ',');
+        }
+      }
+      // remove last period-sign
+      if (sql.at(sql.length() - 1) == ',') {
+        sql = sql.substr(0, sql.length() - 1);
+      }
+      sql.append(" WHERE " + column_name(table_name, primary_field) + '=' + object.get_value(primary_field).dump() + ";");
+      std::cout << sql;
+
+      return sql;
+    }
+    bool connection::insert(const persistent_object &object)
     {
       const string sql = make_insert_sql(object);
       sql::PreparedStatement *pstmt = this->_con.get()->prepareStatement(sql);
       bool save_result = false;
       try {
         save_result = pstmt->execute();
-      } catch (sql::SQLException e) {
-        std::cout << e.what();
+      } catch (const sql::SQLException& e) {
+        std::cerr << e.what();
       }
       delete(pstmt);
       return save_result;
     }
 
+    bool connection::update(const persistent_object &object)
+    {
+      const string sql = make_update_sql(object);
+      sql::PreparedStatement *psmt = this->_con.get()->prepareStatement(sql);
+      bool save_result = false;
+      try {
+        save_result = psmt->execute();
+      } catch (const sql::SQLException& e) {
+        std::cerr << e.what();
+      }
+      delete(psmt);
+      return save_result;
+    }
+
+    bool connection::save(const persistent_object &object)
+    {
+      return insert(object);
+    }
+
+    bool connection::save_or_update(const persistent_object &object)
+    {
+      if (save(object)) {
+        return true;
+      } else {
+        return update(object);
+      }
+    }
 
     void connection::build_tables_attr(const json &sec_schema)
     {
