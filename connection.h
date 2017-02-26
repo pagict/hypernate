@@ -47,13 +47,14 @@ namespace hypernate {
       bool insert(const persistent_object& object);
       bool update(const persistent_object& object);
 
-      /*
-       * Find the object primary field name, fill it in `ret_field_name`, the returning value
-       * indicating whether the primary column contained.
+      /**
+       * @brief Find the class's primary field name, fill it in `ret_field_name`.
+       * @param class_name the class which contains the primary key.
+       * @param ret_field_name a return field. field name of a primary key would returned.
+       * @return indicates whether there is a primary column or not.
        */
-      bool primary_field_name(const persistent_object& object, string& ret_field_name)
+      inline bool primary_field_name(const string& class_name, string& ret_field_name)
       {
-        auto class_name = object.class_name();
         auto columns = tables.at(class_name);
         for(auto col : columns) {
             auto is_primary_string = col.at(key_col_primary);
@@ -61,7 +62,6 @@ namespace hypernate {
               ret_field_name = col.at(key_col_field);
               return true;
             }
-
         }
         return false;
       }
@@ -72,7 +72,7 @@ namespace hypernate {
        * @param field_name
        * @return column name in database.
        */
-      const string column_name(const string& class_name, const string& field_name) const {
+      inline const string column_name(const string& class_name, const string& field_name) const {
         auto cols = tables.at(class_name);
         for(auto &col : cols) {
           if (col.at(key_col_field).compare(field_name) == 0) {
@@ -89,7 +89,7 @@ namespace hypernate {
        * @param column_name
        * @return field name in memory object.
        */
-      const string field_name(const string& class_name, const string& column_name) const {
+      inline const string field_name(const string& class_name, const string& column_name) const {
         auto cols = tables.at(class_name);
         for(auto &col : cols) {
           if (col.at(key_col_column).compare(column_name) == 0) {
@@ -99,6 +99,8 @@ namespace hypernate {
 
         return "";
       }
+
+      bool excute_prepared_statement(const string& sql);
   };
 
 }
