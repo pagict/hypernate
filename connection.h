@@ -24,14 +24,19 @@ namespace hypernate {
     public:
       connection(const json& connection_section);
 
-      bool save(const persistent_object& object);
-      bool save_or_update(const persistent_object& object);
+      void save(const persistent_object& object);
+      void update(const persistent_object& object);
+//      void save_or_update(const persistent_object& object);
+      void begin_transaction();
+      bool commit();
 
     private:
       string  _url;
       string  _username;
       string  _password;
       string  _schema;
+
+      std::vector<string> _cached_transactions;
 
       static sql::Driver *_driver;
       shared_ptr<sql::Connection> _con;
@@ -45,8 +50,7 @@ namespace hypernate {
       const string make_insert_sql(const persistent_object& object);
       const string make_update_sql(const persistent_object& object);
 
-      bool insert(const persistent_object& object);
-      bool update(const persistent_object& object);
+//      void insert(const persistent_object& object);
 
       /**
        * @brief Find the class's primary field name, fill it in `ret_field_name`.
@@ -101,7 +105,7 @@ namespace hypernate {
         return "";
       }
 
-      bool excute_prepared_statement(const string& sql);
+      bool execute_prepared_statement(const string &sql);
   };
 
 }

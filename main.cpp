@@ -20,10 +20,11 @@ int main()
   connection conn(configs);
 
   plain_table pt;
-  cout << pt.class_name() << endl;
+  conn.begin_transaction();
   pt.set_value("index", 363);
   pt.set_value("text", "updated");
-  conn.save(pt);
+  conn.update(pt);
+  conn.commit();
 
   exit(EXIT_SUCCESS);
 

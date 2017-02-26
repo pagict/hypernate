@@ -80,7 +80,7 @@ namespace hypernate {
       return sql;
     }
 
-    bool connection::excute_prepared_statement(const string &sql)
+    bool connection::execute_prepared_statement(const string &sql)
     {
       bool result = false;
       shared_ptr<sql::PreparedStatement> psmt(_con.get()->prepareStatement(sql));
@@ -92,24 +92,28 @@ namespace hypernate {
       return result;
     }
 
-    bool connection::insert(const persistent_object &object)
+    /*
+    void connection::insert(const persistent_object &object)
     {
       const string sql = make_insert_sql(object);
-      return excute_prepared_statement(sql);
+      return execute_prepared_statement(sql);
     }
+     */
 
-    bool connection::update(const persistent_object &object)
+    void connection::update(const persistent_object &object)
     {
-      const string sql = make_update_sql(object);
-      return excute_prepared_statement(sql);
+      auto sql = make_update_sql(object);
+      _cached_transactions.push_back(sql);
     }
 
-    bool connection::save(const persistent_object &object)
+    void connection::save(const persistent_object &object)
     {
-      return insert(object);
+      auto sql = make_insert_sql(object);
+      _cached_transactions.push_back(sql);
     }
 
-    bool connection::save_or_update(const persistent_object &object)
+    /*
+    void connection::save_or_update(const persistent_object &object)
     {
       if (save(object)) {
         return true;
@@ -117,17 +121,18 @@ namespace hypernate {
         return update(object);
       }
     }
+     */
 
     void connection::build_tables_attr(const json &sec_schema)
     {
       json tables = sec_schema[subsec_tables];
-      for(int i = 0; i < tables.size(); ++i) {
+      for (int i = 0; i < tables.size(); ++i) {
         json table = tables.at(i);
 
         string name = table[key_table_name];
         json array_columns = table[key_table_columns];
         columns cols;
-        for(int j = 0; j < array_columns.size(); ++j) {
+        for (int j = 0; j < array_columns.size(); ++j) {
           json col = array_columns.at(j);
           column_attr attr;
           string v = col[key_col_field];
@@ -148,7 +153,21 @@ namespace hypernate {
 
         this->tables.emplace(std::make_pair(name, cols));
       }
+    }
 
+    void connection::begin_transaction()
+    {
+      _cached_transactions.clear();
+    }
 
+    bool connection::commit()
+    {
+      bool result = true;
+      for(auto sql : _cached_transactions) {
+        result = result && execute_prepared_statement(sql);
+      }
+      _cached_transactions.clear();
+
+      return result;
     }
 }
