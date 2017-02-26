@@ -2,8 +2,9 @@
 // Created by PengPremium on 17/2/20.
 //
 
-#include <json.hpp>
 #include "persistent_object.h"
+
+#include <json.hpp>
 
 namespace hypernate {
 

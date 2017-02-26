@@ -1,10 +1,11 @@
 #include <iostream>
+#include <fstream>
+
 #include <cppconn/driver.h>
 #include <cppconn/resultset.h>
 #include <cppconn/prepared_statement.h>
-
 #include <json.hpp>
-#include <fstream>
+
 #include "connection.h"
 #include "plain_table.h"
 

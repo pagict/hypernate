@@ -2,8 +2,9 @@
 // Created by PengPremium on 17/2/20.
 //
 
-#include <cppconn/prepared_statement.h>
 #include "connection.h"
+
+#include <cppconn/prepared_statement.h>
 
 namespace hypernate {
     sql::Driver* connection::_driver = get_driver_instance();
