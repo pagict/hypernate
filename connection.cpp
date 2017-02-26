@@ -2,8 +2,9 @@
 // Created by PengPremium on 17/2/20.
 //
 
-#include <cppconn/prepared_statement.h>
 #include "connection.h"
+
+#include <cppconn/prepared_statement.h>
 
 namespace hypernate {
     sql::Driver* connection::_driver = get_driver_instance();
@@ -59,7 +60,7 @@ namespace hypernate {
       auto table_name = object.class_name();
       string sql = "UPDATE `" + _schema + "`.`" + table_name + "` SET ";
       string primary_field = "";
-      if (primary_field_name(object, primary_field) == false) {
+      if (primary_field_name(table_name, primary_field) == false) {
         return "";
       }
 
@@ -78,32 +79,29 @@ namespace hypernate {
 
       return sql;
     }
-    bool connection::insert(const persistent_object &object)
+
+    bool connection::excute_prepared_statement(const string &sql)
     {
-      const string sql = make_insert_sql(object);
-      sql::PreparedStatement *pstmt = this->_con.get()->prepareStatement(sql);
-      bool save_result = false;
+      bool result = false;
+      shared_ptr<sql::PreparedStatement> psmt(_con.get()->prepareStatement(sql));
       try {
-        save_result = pstmt->execute();
+        result = psmt->execute();
       } catch (const sql::SQLException& e) {
         std::cerr << e.what();
       }
-      delete(pstmt);
-      return save_result;
+      return result;
+    }
+
+    bool connection::insert(const persistent_object &object)
+    {
+      const string sql = make_insert_sql(object);
+      return excute_prepared_statement(sql);
     }
 
     bool connection::update(const persistent_object &object)
     {
       const string sql = make_update_sql(object);
-      sql::PreparedStatement *psmt = this->_con.get()->prepareStatement(sql);
-      bool save_result = false;
-      try {
-        save_result = psmt->execute();
-      } catch (const sql::SQLException& e) {
-        std::cerr << e.what();
-      }
-      delete(psmt);
-      return save_result;
+      return excute_prepared_statement(sql);
     }
 
     bool connection::save(const persistent_object &object)

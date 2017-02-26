@@ -6,6 +6,7 @@
 #define HYPERNATE_PERSISTENT_OBJECT_H
 
 #include <string>
+
 #include <json.hpp>
 namespace hypernate
 {
