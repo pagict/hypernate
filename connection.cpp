@@ -65,7 +65,7 @@ namespace hypernate {
       } catch (sql::SQLException e) {
         std::cout << e.what();
       }
-
+      delete(pstmt);
       return save_result;
     }
 
