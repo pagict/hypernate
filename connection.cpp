@@ -59,7 +59,14 @@ namespace hypernate {
     {
       const string sql = make_insert_sql(object);
       sql::PreparedStatement *pstmt = this->_con.get()->prepareStatement(sql);
-      return pstmt->execute();
+      bool save_result = false;
+      try {
+        save_result = pstmt->execute();
+      } catch (sql::SQLException e) {
+        std::cout << e.what();
+      }
+
+      return save_result;
     }
 
 
