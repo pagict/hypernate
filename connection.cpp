@@ -103,13 +103,16 @@ namespace hypernate {
         auto field_name = col.at(key_col_field);
         if (exclude_fields.find(field_name) == exclude_fields.end()) {
           if (sql.at(sql.length()-1) == '`')  sql.append(" WHERE ");
-          sql.append(col.at(key_col_column) + "=" + object.get_value(field_name).dump() + ",");
+
+          sql.append(col.at(key_col_column) + "=" + object.get_value(field_name).dump() + " AND ");
         }
       }
 
-      if (sql.at(sql.length() - 1) == ',') {
-        sql.replace(sql.length()-1, 1, ";");
+      if (sql.at(sql.length() - 1) != '`') {
+        size_t cut_idx = sql.find_last_not_of("AND ") + 1;
+        sql = sql.substr(0, cut_idx);
       }
+      sql.append(";");
       return sql;
     }
 
@@ -217,11 +220,13 @@ namespace hypernate {
       typedef remove_const<remove_reference<decltype(object)>::type>::type real_child_type;
 
       auto sql = make_query_sql(object, exclude_fields);
+
       shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
       shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
 
       vector<real_child_type> list;
       while (rs->next()) {
+        // TODO
       }
 
       return list;

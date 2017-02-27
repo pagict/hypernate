@@ -20,14 +20,16 @@ int main()
   connection conn(configs);
 
   plain_table pt;
-  plain_table another;
-  another.set_value("index", 333);
-  conn.begin_transaction();
+//  plain_table another;
+//  another.set_value("index", 333);
+//  conn.begin_transaction();
   pt.set_value("index", 363);
   pt.set_value("text", "updated");
-  conn.remove(another);
-  conn.update(pt);
-  conn.commit();
+//  conn.remove(another);
+//  conn.update(pt);
+//  conn.commit();
+
+  conn.query(pt, {"index", "text"});
 
   exit(EXIT_SUCCESS);
 
