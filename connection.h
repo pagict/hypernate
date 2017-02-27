@@ -10,6 +10,7 @@
 
 #include <json.hpp>
 #include <cppconn/driver.h>
+#include <unordered_set>
 
 #include "persistent_object.h"
 #include "configuration_keys.h"
@@ -17,6 +18,10 @@
 namespace hypernate {
     using std::string;
     using std::shared_ptr;
+    using std::vector;
+    using std::unordered_set;
+    using std::remove_reference;
+    using std::remove_const;
     using nlohmann::json;
 
 
@@ -28,6 +33,8 @@ namespace hypernate {
       void update(const persistent_object& object);
       void remove(const persistent_object& object);
 //      void save_or_update(const persistent_object& object);
+      auto query(const persistent_object& object, unordered_set<string> exclude_fields) ->
+            vector<remove_const<remove_reference<decltype(object)>::type>::type>;
       void begin_transaction();
       bool commit();
 
@@ -51,6 +58,7 @@ namespace hypernate {
       const string make_insert_sql(const persistent_object& object);
       const string make_update_sql(const persistent_object& object);
       const string make_delete_sql(const persistent_object& object);
+      const string make_query_sql(const persistent_object& object, std::unordered_set<string> exclude_fields);
 
 //      void insert(const persistent_object& object);
 

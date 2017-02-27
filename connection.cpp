@@ -90,8 +90,29 @@ namespace hypernate {
       }
       sql.append(column_name(table_name, primary_field)).append("=");
       sql.append(object.get_value(primary_field).dump());
+      sql.append(";");
       return sql;
     }
+
+    const string connection::make_query_sql(const persistent_object &object, unordered_set<string> exclude_fields)
+    {
+      auto class_name = object.class_name();
+      string sql = "SELECT * FROM `" + _schema + "`.`" + class_name + "`";
+      columns cols = tables.at(class_name);
+      for(auto &col : cols) {
+        auto field_name = col.at(key_col_field);
+        if (exclude_fields.find(field_name) == exclude_fields.end()) {
+          if (sql.at(sql.length()-1) == '`')  sql.append(" WHERE ");
+          sql.append(col.at(key_col_column) + "=" + object.get_value(field_name).dump() + ",");
+        }
+      }
+
+      if (sql.at(sql.length() - 1) == ',') {
+        sql.replace(sql.length()-1, 1, ";");
+      }
+      return sql;
+    }
+
     bool connection::execute_prepared_statement(const string &sql)
     {
       bool result = false;
@@ -186,5 +207,23 @@ namespace hypernate {
       _cached_transactions.clear();
 
       return result;
+    }
+
+
+
+    auto connection::query(const persistent_object& object, unordered_set<string> exclude_fields)
+        -> vector<remove_const<remove_reference<decltype(object)>::type>::type>
+    {
+      typedef remove_const<remove_reference<decltype(object)>::type>::type real_child_type;
+
+      auto sql = make_query_sql(object, exclude_fields);
+      shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
+      shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
+
+      vector<real_child_type> list;
+      while (rs->next()) {
+      }
+
+      return list;
     }
 }
