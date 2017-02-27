@@ -26,6 +26,7 @@ namespace hypernate {
 
       void save(const persistent_object& object);
       void update(const persistent_object& object);
+      void remove(const persistent_object& object);
 //      void save_or_update(const persistent_object& object);
       void begin_transaction();
       bool commit();
@@ -49,6 +50,7 @@ namespace hypernate {
 
       const string make_insert_sql(const persistent_object& object);
       const string make_update_sql(const persistent_object& object);
+      const string make_delete_sql(const persistent_object& object);
 
 //      void insert(const persistent_object& object);
 

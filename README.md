@@ -6,7 +6,7 @@ Hibernate-like ORM for C++.
 ##Design goals
 
 ##TODOs
-* [ ] delete object
+* [x] delete object
 * [ ] query
 * [ ] throw exceptions when fail
 * [ ] one-to-many relation mapping

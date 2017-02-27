@@ -80,6 +80,18 @@ namespace hypernate {
       return sql;
     }
 
+    const string connection::make_delete_sql(const persistent_object &object)
+    {
+      auto table_name = object.class_name();
+      string sql = "DELETE FROM `" + _schema + "`.`" + table_name + "` WHERE ";
+      string primary_field;
+      if (primary_field_name(table_name, primary_field) == false) {
+        return "";
+      }
+      sql.append(column_name(table_name, primary_field)).append("=");
+      sql.append(object.get_value(primary_field).dump());
+      return sql;
+    }
     bool connection::execute_prepared_statement(const string &sql)
     {
       bool result = false;
@@ -112,6 +124,11 @@ namespace hypernate {
       _cached_transactions.push_back(sql);
     }
 
+    void connection::remove(const persistent_object &object)
+    {
+      auto sql = make_delete_sql(object);
+      _cached_transactions.push_back(sql);
+    }
     /*
     void connection::save_or_update(const persistent_object &object)
     {
