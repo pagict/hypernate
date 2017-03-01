@@ -90,8 +90,32 @@ namespace hypernate {
       }
       sql.append(column_name(table_name, primary_field)).append("=");
       sql.append(object.get_value(primary_field).dump());
+      sql.append(";");
       return sql;
     }
+
+    const string connection::make_query_sql(const persistent_object &object, unordered_set<string> exclude_fields)
+    {
+      auto class_name = object.class_name();
+      string sql = "SELECT * FROM `" + _schema + "`.`" + class_name + "`";
+      columns cols = tables.at(class_name);
+      for(auto &col : cols) {
+        auto field_name = col.at(key_col_field);
+        if (exclude_fields.find(field_name) == exclude_fields.end()) {
+          if (sql.at(sql.length()-1) == '`')  sql.append(" WHERE ");
+
+          sql.append(col.at(key_col_column) + "=" + object.get_value(field_name).dump() + " AND ");
+        }
+      }
+
+      if (sql.at(sql.length() - 1) != '`') {
+        size_t cut_idx = sql.find_last_not_of("AND ") + 1;
+        sql = sql.substr(0, cut_idx);
+      }
+      sql.append(";");
+      return sql;
+    }
+
     bool connection::execute_prepared_statement(const string &sql)
     {
       bool result = false;
@@ -186,5 +210,20 @@ namespace hypernate {
       _cached_transactions.clear();
 
       return result;
+    }
+
+    json connection::get_column_data(const string &type, const string& column_name, shared_ptr<sql::ResultSet> rs)
+    {
+      if (type.find("int") != string::npos) {
+        return rs->getInt(column_name);
+      }
+      if (type.find("varchar") != string::npos || type.find("text") != string::npos) {
+        return rs->getString(column_name);
+      }
+      if (type.find("double") != string::npos) {
+        return rs->getDouble(column_name);
+      }
+
+      return json();
     }
 }

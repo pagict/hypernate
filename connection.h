@@ -10,6 +10,9 @@
 
 #include <json.hpp>
 #include <cppconn/driver.h>
+#include <unordered_set>
+#include <cppconn/resultset.h>
+#include <cppconn/prepared_statement.h>
 
 #include "persistent_object.h"
 #include "configuration_keys.h"
@@ -17,6 +20,10 @@
 namespace hypernate {
     using std::string;
     using std::shared_ptr;
+    using std::vector;
+    using std::unordered_set;
+    using std::remove_reference;
+    using std::remove_const;
     using nlohmann::json;
 
 
@@ -28,6 +35,33 @@ namespace hypernate {
       void update(const persistent_object& object);
       void remove(const persistent_object& object);
 //      void save_or_update(const persistent_object& object);
+
+      template <typename T>
+      vector<T> query(const T& object, const unordered_set<string>& exclude_fields) {
+        static_assert(std::is_base_of<persistent_object, T>::value,
+                      "should be a persistent_object subclass ");
+
+        auto sql = make_query_sql(object, exclude_fields);
+        shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
+        shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
+
+        vector<T> list;
+        while (rs->next()) {
+          T t;
+          columns cols = tables.at(object.class_name());
+          for (auto &col : cols) {
+            json j;
+            auto field_name = col.at(key_col_field);
+            auto col_name = col.at(key_col_column);
+            auto db_type = col.at(key_col_database_type);
+            t.set_value(field_name, get_column_data(db_type, col_name, rs));
+          }
+
+          list.push_back(t);
+        }
+        return list;
+      }
+
       void begin_transaction();
       bool commit();
 
@@ -51,6 +85,7 @@ namespace hypernate {
       const string make_insert_sql(const persistent_object& object);
       const string make_update_sql(const persistent_object& object);
       const string make_delete_sql(const persistent_object& object);
+      const string make_query_sql(const persistent_object& object, std::unordered_set<string> exclude_fields);
 
 //      void insert(const persistent_object& object);
 
@@ -108,6 +143,8 @@ namespace hypernate {
       }
 
       bool execute_prepared_statement(const string &sql);
+
+      json get_column_data(const string& type, const string& column_name, shared_ptr<sql::ResultSet> rs);
   };
 
 }
