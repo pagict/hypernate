@@ -11,6 +11,8 @@
 #include <json.hpp>
 #include <cppconn/driver.h>
 #include <unordered_set>
+#include <cppconn/resultset.h>
+#include <cppconn/prepared_statement.h>
 
 #include "persistent_object.h"
 #include "configuration_keys.h"
@@ -33,8 +35,23 @@ namespace hypernate {
       void update(const persistent_object& object);
       void remove(const persistent_object& object);
 //      void save_or_update(const persistent_object& object);
-      auto query(const persistent_object& object, unordered_set<string> exclude_fields) ->
-            vector<remove_const<remove_reference<decltype(object)>::type>::type>;
+
+      template <typename T>
+      vector<T> query(const T& object, const unordered_set<string>& exclude_fields) {
+        static_assert(std::is_base_of<persistent_object, T>::value,
+                      "should be a persistent_object subclass ");
+
+        auto sql = make_query_sql(object, exclude_fields);
+        shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
+        shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
+
+        vector<T> list;
+//        while (rs->next()) {
+//          //TODO
+//        }
+        return list;
+      }
+
       void begin_transaction();
       bool commit();
 

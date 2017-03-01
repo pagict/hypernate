@@ -211,24 +211,4 @@ namespace hypernate {
 
       return result;
     }
-
-
-
-    auto connection::query(const persistent_object& object, unordered_set<string> exclude_fields)
-        -> vector<remove_const<remove_reference<decltype(object)>::type>::type>
-    {
-      typedef remove_const<remove_reference<decltype(object)>::type>::type real_child_type;
-
-      auto sql = make_query_sql(object, exclude_fields);
-
-      shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
-      shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
-
-      vector<real_child_type> list;
-      while (rs->next()) {
-        // TODO
-      }
-
-      return list;
-    }
 }
