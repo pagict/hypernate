@@ -46,9 +46,19 @@ namespace hypernate {
         shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
 
         vector<T> list;
-//        while (rs->next()) {
-//          //TODO
-//        }
+        while (rs->next()) {
+          T t;
+          columns cols = tables.at(object.class_name());
+          for (auto &col : cols) {
+            json j;
+            auto field_name = col.at(key_col_field);
+            auto col_name = col.at(key_col_column);
+            auto db_type = col.at(key_col_database_type);
+            t.set_value(field_name, get_column_data(db_type, col_name, rs));
+          }
+
+          list.push_back(t);
+        }
         return list;
       }
 
@@ -133,6 +143,8 @@ namespace hypernate {
       }
 
       bool execute_prepared_statement(const string &sql);
+
+      json get_column_data(const string& type, const string& column_name, shared_ptr<sql::ResultSet> rs);
   };
 
 }

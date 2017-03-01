@@ -7,9 +7,10 @@ Hibernate-like ORM for C++.
 
 ##TODOs
 * [x] delete object
-* [ ] query
+* [x] query
 * [ ] throw exceptions when fail
 * [ ] one-to-many relation mapping
+* [ ] concurrency-safe
 
 
 ##License
