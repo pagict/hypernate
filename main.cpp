@@ -34,5 +34,12 @@ int main()
     cout <<"{ index:" << item.get_value("index") << ", text:" << item.get_value("text") << "}" << endl;
   }
 
+  plain_table another_pt;
+  another_pt.set_value("text", "another pt text");
+  another_pt.set_value("index", 878);
+  conn.begin_transaction();
+  conn.save(another_pt);
+  conn.commit();
+
   exit(EXIT_SUCCESS);
 }

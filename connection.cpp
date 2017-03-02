@@ -123,48 +123,30 @@ namespace hypernate {
       bool result = false;
       shared_ptr<sql::PreparedStatement> psmt(_con.get()->prepareStatement(sql));
       try {
-        result = psmt->execute();
+        result = !psmt->execute();
       } catch (const sql::SQLException& e) {
         std::cerr << e.what();
       }
       return result;
     }
 
-    /*
-    void connection::insert(const persistent_object &object)
-    {
-      const string sql = make_insert_sql(object);
-      return execute_prepared_statement(sql);
-    }
-     */
-
-    void connection::update(const persistent_object &object)
+    void connection::update(const persistent_object& object)
     {
       auto sql = make_update_sql(object);
-      _cached_transactions.push_back(sql);
+      _cached_transactions.push_back(std::make_pair(sql, object.default_hook));
     }
 
-    void connection::save(const persistent_object &object)
+    void connection::save(persistent_object &object)
     {
       auto sql = make_insert_sql(object);
-      _cached_transactions.push_back(sql);
+      _cached_transactions.push_back(std::make_pair(sql, object.save_hook));
     }
 
-    void connection::remove(const persistent_object &object)
+    void connection::remove(persistent_object &object)
     {
       auto sql = make_delete_sql(object);
-      _cached_transactions.push_back(sql);
+      _cached_transactions.push_back(std::make_pair(sql, object.remove_hook));
     }
-    /*
-    void connection::save_or_update(const persistent_object &object)
-    {
-      if (save(object)) {
-        return true;
-      } else {
-        return update(object);
-      }
-    }
-     */
 
     void connection::build_tables_attr(const json &sec_schema)
     {
@@ -205,13 +187,15 @@ namespace hypernate {
 
     bool connection::commit()
     {
-      bool result = true;
-      for(auto sql : _cached_transactions) {
-        result = result && execute_prepared_statement(sql);
+      bool total_result = true;
+      for(auto sql_hook : _cached_transactions) {
+        bool result = execute_prepared_statement(sql_hook.first);
+        if (result) sql_hook.second();
+        total_result = total_result && result;
       }
       _cached_transactions.clear();
 
-      return result;
+      return total_result;
     }
 
     json connection::get_column_data(const string &type, const string& column_name, shared_ptr<sql::ResultSet> rs)

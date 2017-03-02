@@ -38,10 +38,9 @@ namespace hypernate {
     public:
       connection(const json& connection_section);
 
-      void save(const persistent_object& object);
+      void save(persistent_object& object);
       void update(const persistent_object& object);
-      void remove(const persistent_object& object);
-//      void save_or_update(const persistent_object& object);
+      void remove(persistent_object& object);
 
       template <typename T>
       vector<T> query(const T& object, const unordered_set<string>& exclude_fields, MatchMode matchMode = MatchMode_EXACT) {
@@ -63,6 +62,7 @@ namespace hypernate {
             auto col_name = col.at(key_col_column);
             auto db_type = col.at(key_col_database_type);
             t.set_value(field_name, get_column_data(db_type, col_name, rs));
+            t.query_hook();
           }
 
           list.push_back(t);
@@ -79,7 +79,7 @@ namespace hypernate {
       string  _password;
       string  _schema;
 
-      std::vector<string> _cached_transactions;
+      std::vector<std::pair<string, persistent_object::operation_hook>> _cached_transactions;
 
       static sql::Driver *_driver;
       shared_ptr<sql::Connection> _con;

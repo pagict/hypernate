@@ -20,6 +20,7 @@ namespace hypernate {
 
     persistent_object::persistent_object()
         : _data(std::shared_ptr<nlohmann::json>(new nlohmann::json()))
+        , is_created(true)
     {
     }
 }

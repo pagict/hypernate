@@ -15,12 +15,21 @@ namespace hypernate
 
     class persistent_object {
      public:
+      typedef std::function<void(void)> operation_hook;
+     public:
       virtual const string class_name() const {
         return "persistent_object";
       }
 
      private:
       std::shared_ptr<nlohmann::json > _data;
+
+      friend class connection;
+      bool is_created;
+      operation_hook save_hook = [&] () { is_created = false;  };
+      operation_hook remove_hook = [&] () { is_created = true; };
+      operation_hook query_hook = [&] () { is_created = false; };
+      operation_hook default_hook = [&] () {};
      public:
       persistent_object();
 
