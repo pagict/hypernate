@@ -29,7 +29,7 @@ int main()
 //  conn.update(pt);
 //  conn.commit();
 
-  auto list = conn.query(pt, {"index", "text"});
+  auto list = conn.query(pt, { "index"}, MatchMode_ANY);
   for(auto &item : list) {
     cout <<"{ index:" << item.get_value("index") << ", text:" << item.get_value("text") << "}" << endl;
   }

@@ -94,7 +94,9 @@ namespace hypernate {
       return sql;
     }
 
-    const string connection::make_query_sql(const persistent_object &object, unordered_set<string> exclude_fields)
+    const string connection::make_query_sql(const persistent_object &object,
+                                            const unordered_set<string>& exclude_fields,
+                                            MatchMode matchMode)
     {
       auto class_name = object.class_name();
       string sql = "SELECT * FROM `" + _schema + "`.`" + class_name + "`";
@@ -104,7 +106,7 @@ namespace hypernate {
         if (exclude_fields.find(field_name) == exclude_fields.end()) {
           if (sql.at(sql.length()-1) == '`')  sql.append(" WHERE ");
 
-          sql.append(col.at(key_col_column) + "=" + object.get_value(field_name).dump() + " AND ");
+          sql.append(col.at(key_col_column) + match_operator(matchMode, object.get_value(field_name)) + " AND ");
         }
       }
 

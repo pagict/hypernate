@@ -11,6 +11,7 @@ Hibernate-like ORM for C++.
 * [ ] throw exceptions when fail
 * [ ] one-to-many relation mapping
 * [ ] concurrency-safe
+* [ ] toggle debug switch to dump generated SQL or not.
 
 
 ##License

@@ -26,6 +26,13 @@ namespace hypernate {
     using std::remove_const;
     using nlohmann::json;
 
+    enum MatchMode {
+        MatchMode_EXACT,
+        MatchMode_ANY,
+        MatchMode_START,
+        MAtchMode_END
+    };
+
 
   class connection {
     public:
@@ -37,11 +44,12 @@ namespace hypernate {
 //      void save_or_update(const persistent_object& object);
 
       template <typename T>
-      vector<T> query(const T& object, const unordered_set<string>& exclude_fields) {
+      vector<T> query(const T& object, const unordered_set<string>& exclude_fields, MatchMode matchMode = MatchMode_EXACT) {
         static_assert(std::is_base_of<persistent_object, T>::value,
                       "should be a persistent_object subclass ");
 
-        auto sql = make_query_sql(object, exclude_fields);
+        auto sql = make_query_sql(object, exclude_fields, matchMode);
+        std::cout << sql << std::endl;
         shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
         shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
 
@@ -85,7 +93,9 @@ namespace hypernate {
       const string make_insert_sql(const persistent_object& object);
       const string make_update_sql(const persistent_object& object);
       const string make_delete_sql(const persistent_object& object);
-      const string make_query_sql(const persistent_object& object, std::unordered_set<string> exclude_fields);
+      const string make_query_sql(const persistent_object& object,
+                                  const std::unordered_set<string>& exclude_fields,
+                                  MatchMode matchMode = MatchMode_EXACT);
 
 //      void insert(const persistent_object& object);
 
@@ -145,6 +155,24 @@ namespace hypernate {
       bool execute_prepared_statement(const string &sql);
 
       json get_column_data(const string& type, const string& column_name, shared_ptr<sql::ResultSet> rs);
+
+      const string match_operator(MatchMode mode, const json& value) const {
+        if (value.is_number()) return value.dump();
+
+        if (value.is_string()) {
+          switch (mode) {
+            case MatchMode_EXACT:
+              return "=" + value.dump();
+            case MatchMode_START:
+              return " LIKE '" + value.get<string>() + "%'";
+            case MAtchMode_END:
+              return " LIKE '%" + value.get<string>() + "'";
+            case MatchMode_ANY:
+              return " LIKE '%" + value.get<string>() + "%'";
+          }
+        }
+        return "";
+      }
   };
 
 }
