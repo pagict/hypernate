@@ -25,5 +25,6 @@ namespace hypernate {
     static const string  key_col_primary       = "primary";
     static const string  key_col_class_type    = "class_type";
     static const string  key_col_database_type = "database_type";
+    static const string  key_col_1_2_1         = "one_to_one";
 }
 #endif //HYPERNATE_CONFIGURATION_KEY_H

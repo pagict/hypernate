@@ -26,6 +26,55 @@
               "database_type": "varchar(45)"
             }
           ]
+        },
+        {
+          "name": "classes",
+          "columns": [
+            {
+              "field" : "id",
+              "column": "class_id",
+              "primary":  true,
+              "class_type": "int",
+              "database_type":"int(11)"
+            },
+            {
+              "field" : "name",
+              "column": "name",
+              "class_type" : "std::string",
+              "database_type": "varchar(45)"
+            },
+            {
+              "field" : "chinese_teacher",
+              "column" : "chinese_teacher_id",
+              "class_type" : "teacher",
+              "database_type": "int(11)",
+              "one-to-one" : true
+            },
+            {
+              "field" : "math_teacher",
+              "column": "math_teacher_id",
+              "class_type" : "teacher",
+              "database_type" : "int(11)",
+              "one_to_one"  : true
+            }
+          ]
+        },
+        {
+          "name"  : "teacher",
+          "columns" : [
+            {
+              "field" : "id",
+              "column"  : "teacher_id",
+              "class_type" : "int",
+              "database_type" : "int(11)"
+            },
+            {
+              "field" : "name",
+              "column" : "teacher_name",
+              "class_type": "std::string",
+              "database_type": "varchar(11)"
+            }
+          ]
         }
       ]
     }
