@@ -8,11 +8,14 @@ Hibernate-like ORM for C++.
 ##TODOs
 * [x] delete object
 * [x] query
-* [ ] throw exceptions when fail
+* [x] throw exceptions when fail
 * [ ] one-to-many relation mapping
 * [ ] concurrency-safe
 * [ ] toggle debug switch to dump generated SQL or not.
-* [ ] insertion with auto-increment column.
+* [ ] insertion with auto-increment hyper_column.
+* [ ] transaction rollback.
+* [ ] more type support.
+* [ ] combined primary key.
 
 
 ##License

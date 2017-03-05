@@ -8,7 +8,14 @@
 #include <string>
 
 namespace hypernate {
-    using std::string;
+    enum match_mode_t {
+        match_mode_exact,
+        match_mode_any,
+        match_mode_begin,
+        match_mode_end
+    };
+
+
 
     static const string  section_configuration = "configuration";
     static const string  section_connection    = "connection";

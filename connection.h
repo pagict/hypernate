@@ -16,6 +16,7 @@
 
 #include "persistent_object.h"
 #include "configuration_keys.h"
+#include "hyper_table.h"
 
 namespace hypernate {
     using std::string;
@@ -25,13 +26,6 @@ namespace hypernate {
     using std::remove_reference;
     using std::remove_const;
     using nlohmann::json;
-
-    enum MatchMode {
-        MatchMode_EXACT,
-        MatchMode_ANY,
-        MatchMode_START,
-        MAtchMode_END
-    };
 
 
   class connection {
@@ -43,11 +37,12 @@ namespace hypernate {
       void remove(persistent_object& object);
 
       template <typename T>
-      vector<T> query(const T& object, const unordered_set<string>& exclude_fields, MatchMode matchMode = MatchMode_EXACT) {
+      vector<T> query(const T& object, const unordered_set<string>& exclude_fields, match_mode_t matchMode = match_mode_exact) {
         static_assert(std::is_base_of<persistent_object, T>::value,
                       "should be a persistent_object subclass ");
 
-        auto sql = make_query_sql(object, exclude_fields, matchMode);
+        auto& table = find_table(object.class_name());
+        auto sql = table.make_query_sql(object, exclude_fields, matchMode);
         std::cout << sql << std::endl;
         shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
         shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
@@ -55,12 +50,13 @@ namespace hypernate {
         vector<T> list;
         while (rs->next()) {
           T t;
-          columns cols = tables.at(object.class_name());
+//          columns cols = tables.at(object.class_name());
+          auto &cols = find_table(object.class_name()).columns;
           for (auto &col : cols) {
             json j;
-            auto field_name = col.at(key_col_field);
-            auto col_name = col.at(key_col_column);
-            auto db_type = col.at(key_col_database_type);
+            auto field_name = col->field_name;
+            auto col_name = col->column_name;
+            auto db_type = col->get_database_type();
             t.set_value(field_name, get_column_data(db_type, col_name, rs));
             t.query_hook();
           }
@@ -84,94 +80,19 @@ namespace hypernate {
       static sql::Driver *_driver;
       shared_ptr<sql::Connection> _con;
 
-      typedef std::unordered_map<string, string> column_attr;
-      typedef std::vector<column_attr>  columns;
-      std::unordered_map<string, columns> tables;
-
-      void build_tables_attr(const json& sec_schema);
-
-      const string make_insert_sql(const persistent_object& object);
-      const string make_update_sql(const persistent_object& object);
-      const string make_delete_sql(const persistent_object& object);
-      const string make_query_sql(const persistent_object& object,
-                                  const std::unordered_set<string>& exclude_fields,
-                                  MatchMode matchMode = MatchMode_EXACT);
-
-//      void insert(const persistent_object& object);
-
-      /**
-       * @brief Find the class's primary field name, fill it in `ret_field_name`.
-       * @param class_name the class which contains the primary key.
-       * @param ret_field_name a return field. field name of a primary key would returned.
-       * @return indicates whether there is a primary column or not.
-       */
-      inline bool primary_field_name(const string& class_name, string& ret_field_name)
-      {
-        auto columns = tables.at(class_name);
-        for(auto col : columns) {
-            auto is_primary_string = col.at(key_col_primary);
-            if (is_primary_string.compare("true") == 0) {
-              ret_field_name = col.at(key_col_field);
-              return true;
-            }
-        }
-        return false;
-      }
-
-      /**
-       * @brief find the column name(in database), by the given field name(in memory object).
-       * @param class_name Also table name, which table the field/column belongs to.
-       * @param field_name
-       * @return column name in database.
-       */
-      inline const string column_name(const string& class_name, const string& field_name) const {
-        auto cols = tables.at(class_name);
-        for(auto &col : cols) {
-          if (col.at(key_col_field).compare(field_name) == 0) {
-            return col.at(key_col_column);
-          }
-        }
-
-        return "";
-      }
-
-      /**
-       * @brief find the field name(in memory object), by the given column name(in database).
-       * @param class_name Also table name, which table the field/column belongs to.
-       * @param column_name
-       * @return field name in memory object.
-       */
-      inline const string field_name(const string& class_name, const string& column_name) const {
-        auto cols = tables.at(class_name);
-        for(auto &col : cols) {
-          if (col.at(key_col_column).compare(column_name) == 0) {
-            return col.at(key_col_field);
-          }
-        }
-
-        return "";
-      }
+      vector<hyper_table> _tables;
 
       bool execute_prepared_statement(const string &sql);
 
       json get_column_data(const string& type, const string& column_name, shared_ptr<sql::ResultSet> rs);
 
-      const string match_operator(MatchMode mode, const json& value) const {
-        if (value.is_number()) return value.dump();
-
-        if (value.is_string()) {
-          switch (mode) {
-            case MatchMode_EXACT:
-              return "=" + value.dump();
-            case MatchMode_START:
-              return " LIKE '" + value.get<string>() + "%'";
-            case MAtchMode_END:
-              return " LIKE '%" + value.get<string>() + "'";
-            case MatchMode_ANY:
-              return " LIKE '%" + value.get<string>() + "%'";
-          }
+      hyper_table& find_table(const string& class_name)
+      {
+        for(hyper_table &table : _tables) {
+          if (table.table_name.compare(class_name) == 0) return table;
         }
-        return "";
+
+        throw std::out_of_range("no such table named '" + class_name + "'");
       }
   };
 
