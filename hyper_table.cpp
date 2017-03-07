@@ -76,10 +76,11 @@ namespace hypernate
                                              const match_mode_t mode)
     {
       string sql = "SELECT * FROM " + table_name;
+      const string sql_prefix = sql;
       for(auto &col : columns) {
         auto field_name = col->field_name;
         if (exclude_fields.find(field_name) == exclude_fields.end()) {
-          if (sql.at(sql.length()-1) == '`')  sql.append(" WHERE ");
+          if (sql.compare(sql_prefix) == 0)  sql.append(" WHERE ");
 
           sql.append(col->column_name + match_operator(mode, object.get_value(field_name)) + " AND ");
         }

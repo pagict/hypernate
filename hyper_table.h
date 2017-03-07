@@ -34,7 +34,7 @@ namespace hypernate
                                   const match_mode_t mode = match_mode_exact);
 
       const string match_operator(match_mode_t mode, const json& value) const {
-        if (value.is_number()) return value.dump();
+        if (value.is_number()) return "=" + value.dump();
 
         if (value.is_string()) {
           switch (mode) {

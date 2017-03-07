@@ -5,7 +5,7 @@
 #ifndef HYPERNATE_SCHOOL_H
 #define HYPERNATE_SCHOOL_H
 
-#include "persistent_object.h"
+#include "../persistent_object.h"
 class teacher : public hypernate::persistent_object {
  public:
   const std::string class_name() const {

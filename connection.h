@@ -37,7 +37,9 @@ namespace hypernate {
       void remove(persistent_object& object);
 
       template <typename T>
-      vector<T> query(const T& object, const unordered_set<string>& exclude_fields, match_mode_t matchMode = match_mode_exact) {
+      vector<T> query(const T& object,
+                      const unordered_set<string>& exclude_fields = {},
+                      match_mode_t matchMode = match_mode_exact) {
         static_assert(std::is_base_of<persistent_object, T>::value,
                       "should be a persistent_object subclass ");
 
