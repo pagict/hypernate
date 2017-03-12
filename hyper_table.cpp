@@ -3,6 +3,7 @@
 //
 
 #include "hyper_table.h"
+#include "persistent_object.h"
 #include "configuration_keys.h"
 namespace hypernate
 {

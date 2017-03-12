@@ -43,23 +43,28 @@ namespace hypernate {
         static_assert(std::is_base_of<persistent_object, T>::value,
                       "should be a persistent_object subclass ");
 
-        auto& table = find_table(object.class_name());
-        auto sql = table.make_query_sql(object, exclude_fields, matchMode);
+        auto table = find_table(object.class_name());
+        auto sql = table->make_query_sql(object, exclude_fields, matchMode);
         std::cout << sql << std::endl;
         shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
         shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
 
         vector<T> list;
         while (rs->next()) {
-          T t;
+          T t(this);
 //          columns cols = tables.at(object.class_name());
-          auto &cols = find_table(object.class_name()).columns;
+          auto cols = find_table(object.class_name())->columns;
           for (auto &col : cols) {
             json j;
             auto field_name = col->field_name;
             auto col_name = col->column_name;
             auto db_type = col->get_database_type();
-            t.set_value(field_name, get_column_data(db_type, col_name, rs));
+
+            if (col->is_one_to_one_column()) {
+              auto db_col_name = col->column_name;
+            } else {
+              t.set_value(field_name, get_column_data(db_type, col_name, rs));
+            }
             t.query_hook();
           }
 
@@ -78,23 +83,33 @@ namespace hypernate {
       string  _schema;
 
       std::vector<std::pair<string, persistent_object::operation_hook>> _cached_transactions;
+      std::unordered_map<string, persistent_object&> _registered;
+
 
       static sql::Driver *_driver;
       shared_ptr<sql::Connection> _con;
 
-      vector<hyper_table> _tables;
+      vector<shared_ptr<hyper_table>> _tables;
 
       bool execute_prepared_statement(const string &sql);
 
       json get_column_data(const string& type, const string& column_name, shared_ptr<sql::ResultSet> rs);
 
-      hyper_table& find_table(const string& class_name)
+   public:
+      shared_ptr<hyper_table> find_table(const string& class_name)
       {
-        for(hyper_table &table : _tables) {
-          if (table.table_name.compare(class_name) == 0) return table;
+        for(auto table : _tables) {
+          if (table->table_name.compare(class_name) == 0) return table;
         }
 
         throw std::out_of_range("no such table named '" + class_name + "'");
+      }
+
+      template <typename T>
+      void register_persistent_object(const T& object) {
+        static_assert(std::is_base_of<persistent_object, T>::value,
+                      "template argument should be a subclass of persistent_object");
+        _registered[object.class_name()] = T();
       }
   };
 

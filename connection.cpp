@@ -31,7 +31,7 @@ namespace hypernate {
 
       auto& tables = config[section_schema][subsec_tables];
       for (int i = 0; i < tables.size(); ++i) {
-        _tables.push_back(hyper_table(tables.at(i)));
+        _tables.push_back(shared_ptr<hyper_table>(new hyper_table(tables.at(i))));
       }
     }
 
@@ -50,20 +50,20 @@ namespace hypernate {
 
     void connection::update(const persistent_object& object)
     {
-      auto sql = find_table(object.class_name()).make_update_sql(object);
+      auto sql = find_table(object.class_name())->make_update_sql(object);
       std::cout << sql << std::endl;
       _cached_transactions.push_back(std::make_pair(sql, object.default_hook));
     }
 
     void connection::save(persistent_object &object)
     {
-      auto sql = find_table(object.class_name()).make_insert_sql(object);
+      auto sql = find_table(object.class_name())->make_insert_sql(object);
       _cached_transactions.push_back(std::make_pair(sql, object.save_hook));
     }
 
     void connection::remove(persistent_object &object)
     {
-      auto sql = find_table(object.class_name()).make_delete_sql(object);
+      auto sql = find_table(object.class_name())->make_delete_sql(object);
       _cached_transactions.push_back(std::make_pair(sql, object.remove_hook));
     }
 

@@ -11,6 +11,12 @@ class teacher : public hypernate::persistent_object {
   const std::string class_name() const {
     return "teacher";
   }
+  teacher(hypernate::connection* conn)
+      : hypernate::persistent_object(conn)
+  {}
+  teacher(std::shared_ptr<hypernate::connection> conn)
+      : hypernate::persistent_object(conn)
+  {}
 };
 
 class classes : public hypernate::persistent_object {
@@ -18,6 +24,12 @@ class classes : public hypernate::persistent_object {
   const std::string class_name() const {
     return "classes";
   }
+  classes(hypernate::connection* conn)
+  : hypernate::persistent_object(conn)
+      {}
+  classes(std::shared_ptr<hypernate::connection> conn)
+  : hypernate::persistent_object(conn)
+      {}
 };
 
 #endif //HYPERNATE_SCHOOL_H

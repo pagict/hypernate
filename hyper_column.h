@@ -22,15 +22,16 @@ namespace hypernate
       inline const string get_object_type() { return object_type; }
 
       inline bool is_primary_column() { return is_primary; }
-      inline bool is_one_to_one();
-      inline bool is_one_to_many();
-      inline bool is_many_to_one();
-      inline bool is_many_to_many();
+      inline bool is_one_to_one_column() { return is_one2one; }
+      inline bool is_one_to_many_column() { return is_one2many; }
 
      private:
       bool is_primary;
       string database_type;
       string object_type;
+
+      bool is_one2one;
+      bool is_one2many;
     };
 }
 

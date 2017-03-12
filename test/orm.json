@@ -48,7 +48,7 @@
               "column" : "chinese_teacher_id",
               "class_type" : "teacher",
               "database_type": "int(11)",
-              "one-to-one" : true
+              "one_to_one" : true
             },
             {
               "field" : "math_teacher",
