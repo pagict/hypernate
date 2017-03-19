@@ -45,14 +45,14 @@ namespace hypernate
       }
 
       inline shared_ptr<hyper_column> get_primary_column() { return primary_column; }
-      const string make_insert_sql(const persistent_object& object);
-      const string make_update_sql(const persistent_object& object);
-      const string make_delete_sql(const persistent_object& object);
-      const string make_query_sql(const persistent_object& object,
-                                  const unordered_set<string>& exclusions = {},
-                                  const match_mode_t mode = match_mode_exact);
+//      const string make_insert_sql(const persistent_object& object);
+//      const string make_update_sql(const persistent_object& object);
+//      const string make_delete_sql(const persistent_object& object);
+//      const string make_query_sql(const persistent_object& object,
+//                                  const unordered_set<string>& exclusions = {},
+//                                  const match_mode_t mode = match_mode_exact);
 
-      const string match_operator(match_mode_t mode, const json& value) const {
+      static const string match_operator(match_mode_t mode, const json& value) {
         if (value.is_number()) return "=" + value.dump();
 
         if (value.is_string()) {

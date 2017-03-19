@@ -33,7 +33,7 @@ namespace hypernate {
       connection(const json& connection_section);
 
       void save(persistent_object& object);
-      void update(const persistent_object& object);
+      void update(persistent_object& object);
       void remove(persistent_object& object);
 
       template <typename T>
@@ -44,7 +44,7 @@ namespace hypernate {
                       "should be a persistent_object subclass ");
 
         auto table = find_table(object.class_name());
-        auto sql = table->make_query_sql(object, exclude_fields, matchMode);
+        auto sql = object.make_query_sql(exclude_fields, matchMode);
         std::cout << sql << std::endl;
         shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
         shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());

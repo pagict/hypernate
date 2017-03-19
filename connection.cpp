@@ -48,22 +48,22 @@ namespace hypernate {
       return result;
     }
 
-    void connection::update(const persistent_object& object)
+    void connection::update(persistent_object& object)
     {
-      auto sql = find_table(object.class_name())->make_update_sql(object);
+      auto sql = object.make_update_sql();
       std::cout << sql << std::endl;
       _cached_transactions.push_back(std::make_pair(sql, object.default_hook));
     }
 
     void connection::save(persistent_object &object)
     {
-      auto sql = find_table(object.class_name())->make_insert_sql(object);
+      auto sql = object.make_insert_sql();
       _cached_transactions.push_back(std::make_pair(sql, object.save_hook));
     }
 
     void connection::remove(persistent_object &object)
     {
-      auto sql = find_table(object.class_name())->make_delete_sql(object);
+      auto sql = object.make_delete_sql();
       _cached_transactions.push_back(std::make_pair(sql, object.remove_hook));
     }
 
