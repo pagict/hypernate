@@ -8,7 +8,14 @@
 #include <string>
 
 namespace hypernate {
-    using std::string;
+    enum match_mode_t {
+        match_mode_exact,
+        match_mode_any,
+        match_mode_begin,
+        match_mode_end
+    };
+
+
 
     static const string  section_configuration = "configuration";
     static const string  section_connection    = "connection";
@@ -25,5 +32,7 @@ namespace hypernate {
     static const string  key_col_primary       = "primary";
     static const string  key_col_class_type    = "class_type";
     static const string  key_col_database_type = "database_type";
+    static const string  key_col_one_to_one    = "one_to_one";
+    static const string  key_col_one_to_many   = "one_to_many";
 }
 #endif //HYPERNATE_CONFIGURATION_KEY_H

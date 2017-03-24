@@ -1,0 +1,83 @@
+{
+  "configuration" : {
+    "connection"  : {
+      "url" : "tcp://127.0.0.1:32771",
+      "username"  : "root",
+      "password"  : "root",
+      "schema"    : "new_schema"
+    },
+    "schema"  : {
+      "tables"  : [
+        {
+          "name": "plain_table",
+          "columns": [
+            {
+              "field" : "index",
+              "column" : "idx",
+              "primary" : true,
+              "class_type" : "int",
+              "database_type": "int(11)"
+            },
+            {
+              "field" : "text",
+              "column" : "text",
+              "primary" : false,
+              "class_type": "std::string",
+              "database_type": "varchar(45)"
+            }
+          ]
+        },
+        {
+          "name": "classes",
+          "columns": [
+            {
+              "field" : "id",
+              "column": "class_id",
+              "primary":  true,
+              "class_type": "int",
+              "database_type":"int(11)"
+            },
+            {
+              "field" : "name",
+              "column": "name",
+              "class_type" : "std::string",
+              "database_type": "varchar(45)"
+            },
+            {
+              "field" : "chinese_teacher",
+              "column" : "chinese_teacher_id",
+              "class_type" : "teacher",
+              "database_type": "int(11)",
+              "one_to_one" : true
+            },
+            {
+              "field" : "math_teacher",
+              "column": "math_teacher_id",
+              "class_type" : "teacher",
+              "database_type" : "int(11)",
+              "one_to_one"  : true
+            }
+          ]
+        },
+        {
+          "name"  : "teacher",
+          "columns" : [
+            {
+              "field" : "id",
+              "column"  : "teacher_id",
+              "class_type" : "int",
+              "database_type" : "int(11)",
+              "primary" : true
+            },
+            {
+              "field" : "name",
+              "column" : "teacher_name",
+              "class_type": "std::string",
+              "database_type": "varchar(11)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
