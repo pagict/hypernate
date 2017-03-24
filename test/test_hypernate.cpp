@@ -37,7 +37,7 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   conn->commit();
 
   from_db = conn->query(pt, {"text"});
-  const string text_database = from_db.front().get_value("text").dump();
+  const string text_database = from_db.front()->get_value("text").dump();
 
   EXPECT_EQ(from_db.size(), 1);
   ASSERT_EQ(text_database.compare("\""+updated+"\""), 0);
@@ -58,10 +58,14 @@ TEST(school_test, teachers) {
   shared_ptr<hypernate::connection> conn(new hypernate::connection(configs));
 
   teacher t(conn);
-  auto list = conn->query(t, {"id", "name"});
-  for(auto &item : list ) {
-    cout << "{ id:" << item.get_value("id") << ", name:" << item.get_value("name") << "}" << endl;
+  t.set_value("id", 1);
+  auto list = conn->query(t, {"name"});
+  for(auto item : list ) {
+    cout << "{ id:" << item->get_value("id") << ", name:" << item->get_value("name") << "}" << endl;
   }
+
+  ASSERT_EQ(list.size(), 1);
+  ASSERT_EQ(list.front()->get_value("name").dump().compare("\"miss_wang\""), 0);
 }
 
 int main(int argc, char** argv) {

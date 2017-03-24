@@ -37,7 +37,7 @@ namespace hypernate {
       void remove(persistent_object& object);
 
       template <typename T>
-      vector<T> query(const T& object,
+      vector<shared_ptr<T>> query(const T& object,
                       const unordered_set<string>& exclude_fields = {},
                       match_mode_t matchMode = match_mode_exact) {
         static_assert(std::is_base_of<persistent_object, T>::value,
@@ -49,9 +49,9 @@ namespace hypernate {
         shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
         shared_ptr<sql::ResultSet> rs(pstmt->executeQuery());
 
-        vector<T> list;
+        vector<shared_ptr<T>> list;
         while (rs->next()) {
-          T t(this);
+          shared_ptr<T> one_query_result = shared_ptr<T>(new T(this));
 //          columns cols = tables.at(object.class_name());
           auto cols = find_table(object.class_name())->columns;
           for (auto &col : cols) {
@@ -63,12 +63,12 @@ namespace hypernate {
             if (col->is_one_to_one_column()) {
               auto db_col_name = col->column_name;
             } else {
-              t.set_value(field_name, get_column_data(db_type, col_name, rs));
+              one_query_result->set_value(field_name, get_column_data(db_type, col_name, rs));
             }
-            t.query_hook();
+            one_query_result->query_hook();
           }
 
-          list.push_back(t);
+          list.push_back(one_query_result);
         }
         return list;
       }
