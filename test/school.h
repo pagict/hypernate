@@ -13,7 +13,7 @@ class teacher : public hypernate::persistent_object {
   const std::string class_name() const {
     return _class_name;
   }
-  teacher(hypernate::connection* conn)
+  teacher(const std::string&, hypernate::connection* conn = nullptr)
       : hypernate::persistent_object(_class_name, conn)
   {}
   teacher(std::shared_ptr<hypernate::connection> conn)
@@ -30,7 +30,7 @@ class classes : public hypernate::persistent_object {
   const std::string class_name() const {
     return _class_name;
   }
-  classes(hypernate::connection* conn)
+  classes(const std::string&, hypernate::connection* conn = nullptr)
   : hypernate::persistent_object(_class_name, conn)
       {}
   classes(std::shared_ptr<hypernate::connection> conn)

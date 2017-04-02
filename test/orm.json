@@ -1,7 +1,7 @@
 {
   "configuration" : {
     "connection"  : {
-      "url" : "tcp://127.0.0.1:32771",
+      "url" : "tcp://127.0.0.1:32768",
       "username"  : "root",
       "password"  : "root",
       "schema"    : "new_schema"

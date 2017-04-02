@@ -68,6 +68,18 @@ TEST(school_test, teachers) {
   ASSERT_EQ(list.front()->get_value("name").dump().compare("\"miss_wang\""), 0);
 }
 
+
+TEST(one_to_one, teachers_in_classes) {
+  ifstream config("orm.json");
+  json configs(config);
+
+  shared_ptr<hypernate::connection> conn(new hypernate::connection(configs));
+
+//  unique_ptr<classes> register_class = unique_ptr<classes>(new classes());
+//  conn->register_persistent_object(std::move(register_class));
+  conn->register_persistent_object(classes(conn));
+}
+
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

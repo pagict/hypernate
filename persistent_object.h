@@ -140,9 +140,9 @@ namespace hypernate
         return sql;
       }
 
-     protected:
+     public:
           persistent_object(const string&, connection* conn = nullptr);
-          persistent_object(const string&, shared_ptr<connection> conn = nullptr);
+          persistent_object(const string&, shared_ptr<connection> conn);
     };
 }
 

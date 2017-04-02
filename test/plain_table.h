@@ -16,7 +16,7 @@ class plain_table : public hypernate::persistent_object {
     return _class_name;
   } ;
 
-  plain_table(hypernate::connection* conn)
+  plain_table(const std::string&, hypernate::connection* conn = nullptr)
       : hypernate::persistent_object(_class_name, conn)
   {}
 

@@ -21,6 +21,7 @@
 namespace hypernate {
     using std::string;
     using std::shared_ptr;
+    using std::unique_ptr;
     using std::vector;
     using std::unordered_set;
     using std::remove_reference;
@@ -51,7 +52,7 @@ namespace hypernate {
 
         vector<shared_ptr<T>> list;
         while (rs->next()) {
-          shared_ptr<T> one_query_result = shared_ptr<T>(new T(this));
+          shared_ptr<T> one_query_result = shared_ptr<T>(new T(object.class_name(), this));
 //          columns cols = tables.at(object.class_name());
           auto cols = find_table(object.class_name())->columns;
           for (auto &col : cols) {
@@ -62,6 +63,23 @@ namespace hypernate {
 
             if (col->is_one_to_one_column()) {
               auto db_col_name = col->column_name;
+              auto db_value = get_column_data(db_type, db_col_name, rs);
+              auto registered_class = _registered.find(col->get_object_type())->second;
+
+//              auto _to_one_object = shared_ptr<typename std::decay<decltype(registered_class)>::type>(new typename std::decay<decltype(registered_class)>::type(this));
+//              auto primary_name = _to_one_object->_internal_table->get_primary_column()->field_name;
+//              _to_one_object->set_value(field_name, db_value);
+//              auto connected_object = this->query()
+
+              typename std::decay<decltype(registered_class)>::type query_sample(registered_class.class_name());
+              auto primary_name = query_sample._internal_table->get_primary_column()->field_name;
+              query_sample.set_value(primary_name, db_value);
+              unordered_set<string> exclusions;
+              for (auto &col: query_sample._internal_table->columns) {
+                if (col->is_primary_column()) continue;
+                exclusions.insert(col->field_name);
+              }
+              one_query_result->set_object(field_name, this->query(query_sample, exclusions).front());
             } else {
               one_query_result->set_value(field_name, get_column_data(db_type, col_name, rs));
             }
@@ -105,11 +123,16 @@ namespace hypernate {
         throw std::out_of_range("no such table named '" + class_name + "'");
       }
 
-      template <typename T>
-      void register_persistent_object(const T& object) {
-        static_assert(std::is_base_of<persistent_object, T>::value,
-                      "template argument should be a subclass of persistent_object");
-        _registered[object.class_name()] = T();
+//      template <typename T>
+      void register_persistent_object(persistent_object&& object) {
+//        static_assert(std::is_base_of<persistent_object, T>::value,
+//                      "template argument should be a subclass of persistent_object");
+//        _registered[object.class_name()] = T();
+        string class_name = object.class_name();
+
+        if (_registered.find(class_name) == _registered.end()) {
+          _registered.emplace(class_name, object);
+        }
       }
   };
 
