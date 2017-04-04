@@ -26,10 +26,11 @@ namespace hypernate
       typedef std::function<void(void)> operation_hook;
      public:
       virtual const string class_name() const {
-        return "persistent_object";
+        return my_class_name;
       }
 
      private:
+      string my_class_name;
       std::shared_ptr<nlohmann::json > _data;
       std::unordered_map<string, shared_ptr<persistent_object>> _to_one_objects;
 
@@ -47,13 +48,13 @@ namespace hypernate
 
       auto get_value(const string& key) const -> decltype(_data.get()->at(key));
 
-      template<typename T>
-      shared_ptr<T&> get_object(const string& key) {
-        static_assert(std::is_base_of<persistent_object, T>::value, "template argument should be a subclass of persistent_object");
-
+//      template<typename T>
+      shared_ptr<persistent_object> get_object(const string& key) {
+//        static_assert(std::is_base_of<persistent_object, T>::value, "template argument should be a subclass of persistent_object");
+//
         auto col = _internal_table->find_column_by_field_name(key);
         if (col->is_one_to_many_column() || col->is_one_to_one_column()) {
-          return _to_one_objects[col->field_name];
+          return (_to_one_objects[key]);
         }
         return nullptr;
       }
