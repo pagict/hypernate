@@ -22,16 +22,18 @@ namespace hypernate {
     persistent_object::persistent_object(const string& class_name, connection* conn)
     : _data(std::shared_ptr<nlohmann::json>(new nlohmann::json()))
     , is_created(true)
+    , my_class_name(class_name)
     {
-        if (!conn)  throw std::invalid_argument("null pointer of connection.");
+        if (conn)//  throw std::invalid_argument("null pointer of connection.");
         _internal_table = conn->find_table(class_name);
     }
 
     persistent_object::persistent_object(const string& class_name, shared_ptr<connection> conn)
     : _data(shared_ptr<nlohmann::json>(new nlohmann::json()))
     , is_created(true)
+    , my_class_name(class_name)
     {
-        if (!conn)  throw std::invalid_argument("null pointer of connection.");
+        if (conn)  //throw std::invalid_argument("null pointer of connection.");
         _internal_table = conn->find_table(class_name);
     }
 }

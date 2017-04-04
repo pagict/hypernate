@@ -26,7 +26,10 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   conn->save(pt);
   conn->commit();
 
-  auto from_db = conn->query(pt);
+  shared_ptr<plain_table> pt_ptr(new plain_table(conn));
+  pt_ptr->set_value("index", 45);
+  pt_ptr->set_value("text", "hello insert");
+  auto from_db = conn->query(pt_ptr);
 
   ASSERT_GE(from_db.size(), 0);
 
@@ -36,7 +39,8 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   conn->update(pt);
   conn->commit();
 
-  from_db = conn->query(pt, {"text"});
+  pt_ptr->set_value("text", updated);
+  from_db = conn->query(pt_ptr, {"text"});
   const string text_database = from_db.front()->get_value("text").dump();
 
   EXPECT_EQ(from_db.size(), 1);
@@ -46,7 +50,7 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   conn->remove(pt);
   conn->commit();
 
-  from_db = conn->query(pt, {});
+  from_db = conn->query(pt_ptr, {});
 
   ASSERT_EQ(from_db.size(), 0);
 }
@@ -57,8 +61,8 @@ TEST(school_test, teachers) {
 
   shared_ptr<hypernate::connection> conn(new hypernate::connection(configs));
 
-  teacher t(conn);
-  t.set_value("id", 1);
+  shared_ptr<teacher> t(new teacher(conn));
+  t->set_value("id", 1);
   auto list = conn->query(t, {"name"});
   for(auto item : list ) {
     cout << "{ id:" << item->get_value("id") << ", name:" << item->get_value("name") << "}" << endl;
@@ -66,6 +70,24 @@ TEST(school_test, teachers) {
 
   ASSERT_EQ(list.size(), 1);
   ASSERT_EQ(list.front()->get_value("name").dump().compare("\"miss_wang\""), 0);
+}
+
+
+TEST(one_to_one, teachers_in_classes) {
+  ifstream config("orm.json");
+  json configs(config);
+
+  shared_ptr<hypernate::connection> conn(new hypernate::connection(configs));
+
+  conn->register_persistent_object(shared_ptr<classes>(new classes(conn)));
+  conn->register_persistent_object(shared_ptr<teacher>(new teacher(conn)));
+  shared_ptr<classes> search_sample(new classes(conn));
+  search_sample->set_value("id", 1);
+  auto search_results = conn->query(search_sample, {"name", "chinese_teacher", "math_teacher"});
+  auto& searched_class = search_results.front();
+  auto search_teacher = searched_class->get_object("chinese_teacher");
+
+  ASSERT_EQ(search_teacher->get_value("id"), 1);
 }
 
 int main(int argc, char** argv) {
