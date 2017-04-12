@@ -29,7 +29,7 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   shared_ptr<plain_table> pt_ptr(new plain_table(conn));
   pt_ptr->set_value("index", 45);
   pt_ptr->set_value("text", "hello insert");
-  auto from_db = conn->query(pt_ptr);
+  auto from_db = conn->query(pt_ptr, hypernate::fields_exclude);
 
   ASSERT_GE(from_db.size(), 0);
 
@@ -40,7 +40,7 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   conn->commit();
 
   pt_ptr->set_value("text", updated);
-  from_db = conn->query(pt_ptr, {"text"});
+  from_db = conn->query(pt_ptr, hypernate::fields_exclude, {"text"});
   const string text_database = from_db.front()->get_value("text").dump();
 
   EXPECT_EQ(from_db.size(), 1);
@@ -50,7 +50,7 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   conn->remove(pt);
   conn->commit();
 
-  from_db = conn->query(pt_ptr, {});
+  from_db = conn->query(pt_ptr, hypernate::fields_exclude);
 
   ASSERT_EQ(from_db.size(), 0);
 }
@@ -63,7 +63,7 @@ TEST(school_test, teachers) {
 
   shared_ptr<teacher> t(new teacher(conn));
   t->set_value("id", 1);
-  auto list = conn->query(t, {"name"});
+  auto list = conn->query(t, hypernate::fields_include, {"id"});
   for(auto item : list ) {
     cout << "{ id:" << item->get_value("id") << ", name:" << item->get_value("name") << "}" << endl;
   }
@@ -83,7 +83,7 @@ TEST(one_to_one, teachers_in_classes) {
   conn->register_persistent_object(shared_ptr<teacher>(new teacher(conn)));
   shared_ptr<classes> search_sample(new classes(conn));
   search_sample->set_value("id", 1);
-  auto search_results = conn->query(search_sample, {"name", "chinese_teacher", "math_teacher"});
+  auto search_results = conn->query(search_sample, hypernate::fields_include, {"id"});
   auto& searched_class = search_results.front();
   auto search_teacher = searched_class->get_object("chinese_teacher");
 

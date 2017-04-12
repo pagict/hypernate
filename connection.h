@@ -66,14 +66,12 @@ class connection {
    * @return a list of objects satisfied the criteria as the sample demonstrates.
    */
   vector<shared_ptr<persistent_object>> query(shared_ptr<const persistent_object> object,
-                                              const unordered_set<string>& exclude_fields = {},
+                                              const fields_inclusion_mode inclusion_mode = fields_exclude,
+                                              const unordered_set<string>& fields = {},
                                               match_mode_t matchMode = match_mode_exact) {
-//    static_assert(std::is_base_of<persistent_object, T>::value,
-//                  "should be a persistent_object subclass ");
-
     // make SQL statement
     auto table = find_table(object->class_name());
-    auto sql = object->make_query_sql(exclude_fields, matchMode);
+    auto sql = object->make_query_sql(inclusion_mode, fields, matchMode);
 
     // do primitive query operation
     shared_ptr<sql::PreparedStatement> pstmt(this->_con.get()->prepareStatement(sql));
@@ -95,18 +93,14 @@ class connection {
 
         if (col->is_one_to_one_column()) {
           auto db_value = get_column_data(db_type, col_name, rs);
+          // get the registered object, to deduce the type
           auto registered_ptr = _registered.find(col->get_object_type())->second;
-
           auto class_name = col->get_object_type();
+          // deduce the type, and make sample
           auto query_sample = shared_ptr<std::remove_pointer<decltype(registered_ptr.get())>::type>(new std::remove_pointer<decltype(registered_ptr.get())>::type(class_name, this));
           auto primary_name = registered_ptr->_internal_table->get_primary_column()->field_name;
           query_sample->set_value(primary_name, db_value);
-          unordered_set<string> exclusions;
-          for (auto &col: query_sample->_internal_table->columns) {
-            if (col->is_primary_column()) continue;
-            exclusions.insert(col->field_name);
-          }
-          one_query_result->set_object(field_name, this->query(query_sample, exclusions).front());
+          one_query_result->set_object(field_name, this->query(query_sample, fields_include, {primary_name}).front());
         } else if (col->is_one_to_many_column()) {
 
         } else {

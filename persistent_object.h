@@ -138,17 +138,21 @@ class persistent_object {
     return sql;
   }
 
-  const string make_query_sql(const unordered_set<string>& exclude_fields,
+  const string make_query_sql(const fields_inclusion_mode inclusion_mode,
+                              const unordered_set<string>& fields,
                               const match_mode_t mode) const {
     string sql = "SELECT * FROM " + class_name();
     const string sql_prefix = sql;
     for(auto &col : _internal_table->columns) {
       auto field_name = col->field_name;
-      if (exclude_fields.find(field_name) == exclude_fields.end()) {
-        if (sql.compare(sql_prefix) == 0)  sql.append(" WHERE ");
 
-        sql.append(col->column_name + _internal_table->match_operator(mode, get_value(field_name)) + " AND ");
+      if ((fields.find(field_name) == fields.end() && inclusion_mode == fields_include) ||
+          (fields.find(field_name) != fields.end() && inclusion_mode == fields_exclude)) {
+        continue;
       }
+      if (sql.compare(sql_prefix) == 0)  sql.append(" WHERE ");
+
+      sql.append(col->column_name + _internal_table->match_operator(mode, get_value(field_name)) + " AND ");
     }
 
     if (sql.at(sql.length() - 1) != '`') {

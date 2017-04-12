@@ -15,6 +15,11 @@ namespace hypernate {
         match_mode_end
     };
 
+    enum fields_inclusion_mode {
+      fields_include,
+      fields_exclude
+    };
+
 
 
     static const string  section_configuration = "configuration";
