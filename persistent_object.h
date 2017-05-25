@@ -73,9 +73,13 @@ class persistent_object {
    * @return
    */
   auto get_value(const string& key) const -> decltype(_data.get()->at(key));
+
+  void set_objects(const string& key, unordered_set<shared_ptr<persistent_object>> set);
+  unordered_set<shared_ptr<persistent_object>>& get_objects(const string& key);
  private:
   string my_class_name;
   std::unordered_map<string, shared_ptr<persistent_object>> _to_one_objects;
+  std::unordered_map<string, unordered_set<shared_ptr<persistent_object>>> _to_many_sets;
 
   friend class connection;
   bool is_created;

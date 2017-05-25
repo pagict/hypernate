@@ -56,6 +56,11 @@
               "class_type" : "teacher",
               "database_type" : "int(11)",
               "one_to_one"  : true
+            },
+            {
+              "field" : "students",
+              "class_type"  : "student",
+              "one_to_many" : true
             }
           ]
         },
@@ -73,7 +78,32 @@
               "field" : "name",
               "column" : "teacher_name",
               "class_type": "std::string",
-              "database_type": "varchar(11)"
+              "database_type": "varchar(45)"
+            }
+          ]
+        },
+        {
+          "name"  : "student",
+          "columns" : [
+            {
+              "field" : "id",
+              "column"  : "student_id",
+              "class_type"  : "int",
+              "database_type" : "int(11)",
+              "primary" : true
+            },
+            {
+              "field" : "name",
+              "column"  : "student_name",
+              "class_type"  : "string",
+              "database_type" : "varchar(45)"
+            },
+            {
+              "field" : "class",
+              "column"  : "class_id",
+              "class_type"  : "classes",
+              "database_type" : "int(11)",
+              "many_to_one" : true
             }
           ]
         }

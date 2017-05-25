@@ -8,36 +8,36 @@
 #include <string>
 
 namespace hypernate {
-    enum match_mode_t {
-        match_mode_exact,
-        match_mode_any,
-        match_mode_begin,
-        match_mode_end
-    };
+enum match_mode_t {
+  match_mode_exact,
+  match_mode_any,
+  match_mode_begin,
+  match_mode_end
+};
 
-    enum fields_inclusion_mode {
-      fields_include,
-      fields_exclude
-    };
+enum fields_inclusion_mode {
+  fields_include,
+  fields_exclude
+};
 
 
-
-    static const string  section_configuration = "configuration";
-    static const string  section_connection    = "connection";
-    static const string  key_url               = "url";
-    static const string  key_username          = "username";
-    static const string  key_password          = "password";
-    static const string  key_schema            = "schema";
-    static const string  section_schema        = "schema";
-    static const string  subsec_tables         = "tables";
-    static const string  key_table_name        = "name";
-    static const string  key_table_columns     = "columns";
-    static const string  key_col_field         = "field";
-    static const string  key_col_column        = "column";
-    static const string  key_col_primary       = "primary";
-    static const string  key_col_class_type    = "class_type";
-    static const string  key_col_database_type = "database_type";
-    static const string  key_col_one_to_one    = "one_to_one";
-    static const string  key_col_one_to_many   = "one_to_many";
+static const string  section_configuration = "configuration";
+static const string  section_connection    = "connection";
+static const string  key_url               = "url";
+static const string  key_username          = "username";
+static const string  key_password          = "password";
+static const string  key_schema            = "schema";
+static const string  section_schema        = "schema";
+static const string  subsec_tables         = "tables";
+static const string  key_table_name        = "name";
+static const string  key_table_columns     = "columns";
+static const string  key_col_field         = "field";
+static const string  key_col_column        = "column";
+static const string  key_col_primary       = "primary";
+static const string  key_col_class_type    = "class_type";
+static const string  key_col_database_type = "database_type";
+static const string  key_col_one_to_one    = "one_to_one";
+static const string  key_col_one_to_many   = "one_to_many";
+static const string  key_col_many_to_one   = "many_to_one";
 }
 #endif //HYPERNATE_CONFIGURATION_KEY_H

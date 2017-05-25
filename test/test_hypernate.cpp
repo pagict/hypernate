@@ -81,6 +81,7 @@ TEST(one_to_one, teachers_in_classes) {
 
   conn->register_persistent_object(shared_ptr<classes>(new classes(conn)));
   conn->register_persistent_object(shared_ptr<teacher>(new teacher(conn)));
+  conn->register_persistent_object(shared_ptr<student>(new student(conn)));
   shared_ptr<classes> search_sample(new classes(conn));
   search_sample->set_value("id", 1);
   auto search_results = conn->query(search_sample, hypernate::fields_include, {"id"});

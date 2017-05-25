@@ -23,6 +23,7 @@ class hyper_column {
 
   inline bool is_primary_column() { return is_primary; }
   inline bool is_one_to_one_column() { return is_one2one; }
+  inline bool is_many_to_one_column() { return is_many2one; }
   inline bool is_one_to_many_column() { return is_one2many; }
 
  private:
@@ -31,6 +32,7 @@ class hyper_column {
   string object_type;
 
   bool is_one2one;
+  bool is_many2one;
   bool is_one2many;
 };
 }

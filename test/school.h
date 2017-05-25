@@ -38,6 +38,22 @@ class classes : public hypernate::persistent_object {
       {}
 };
 
+class student: public hypernate::persistent_object {
+ public:
+  const static std::string _class_name;
+
+  const std::string class_name() const {
+    return _class_name;
+  }
+  student(const std::string&, hypernate::connection* conn = nullptr)
+      : hypernate::persistent_object(_class_name, conn)
+  {}
+  student(std::shared_ptr<hypernate::connection> conn)
+      : hypernate::persistent_object(_class_name, conn)
+  {}
+};
+
 const std::string classes::_class_name = "classes";
+const std::string student::_class_name = "student";
 
 #endif //HYPERNATE_SCHOOL_H

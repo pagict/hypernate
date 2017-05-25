@@ -103,7 +103,29 @@ class connection {
           one_query_result->set_object(field_name, this->query(query_sample, fields_include, {primary_name}).front());
         } else if (col->is_one_to_many_column()) {
 
-        } else {
+          auto class_name = col->get_object_type();
+          auto registered_ptr = _registered.find(class_name)->second;
+
+          shared_ptr<hyper_column> mapped_column = nullptr;
+          for(auto i : registered_ptr->_internal_table->columns) {
+            if (i->is_many_to_one_column() && i->get_object_type().compare(object->my_class_name) == 0) {
+              mapped_column = i;
+              break;
+            }
+          }
+          assert(mapped_column != nullptr);
+          auto query_sample = shared_ptr<std::remove_pointer<decltype(registered_ptr.get())>::type>(new std::remove_pointer<
+              decltype(registered_ptr.get())>::type(class_name, this));
+          auto primary_value = object->get_value(object->_internal_table->get_primary_column()->field_name);
+          query_sample->set_value(mapped_column->column_name, primary_value);
+
+          auto set_objects = this->query(query_sample, fields_include, {});
+          std::unordered_set<shared_ptr<std::remove_pointer<decltype(registered_ptr.get())>::type>> mapped_set(set_objects.begin(), set_objects.end());
+          one_query_result->set_objects(col->field_name, mapped_set);
+        } else if (col->is_many_to_one_column()) {
+
+        }
+        else {
           one_query_result->set_value(field_name, get_column_data(db_type, col_name, rs));
         }
         one_query_result->query_hook();
