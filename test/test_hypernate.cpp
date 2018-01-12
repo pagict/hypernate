@@ -44,7 +44,9 @@ TEST(simple_insert_query_update_remove, _plain_table) {
   const string text_database = from_db.front()->get_value("text").dump();
 
   EXPECT_EQ(from_db.size(), 1);
-  ASSERT_EQ(text_database.compare("\""+updated+"\""), 0);
+  string expect_db_name("\"");
+  expect_db_name.append(updated).append(1, '\"');
+  ASSERT_STREQ(text_database.c_str(), expect_db_name.c_str());
 
   conn->begin_transaction();
   conn->remove(pt);
@@ -69,7 +71,7 @@ TEST(school_test, teachers) {
   }
 
   ASSERT_EQ(list.size(), 1);
-  ASSERT_EQ(list.front()->get_value("name").dump().compare("\"miss_wang\""), 0);
+  ASSERT_STREQ(list.front()->get_value("name").dump().c_str(), string("\"miss_wang\"").c_str());
 }
 
 
@@ -88,7 +90,7 @@ TEST(one_to_one, teachers_in_classes) {
   auto& searched_class = search_results.front();
   auto search_teacher = searched_class->get_object("chinese_teacher");
 
-  ASSERT_EQ(search_teacher->get_value("id"), 1);
+  ASSERT_EQ(search_teacher->get_value("id").get<int>(), 1);
 }
 
 int main(int argc, char** argv) {

@@ -4,6 +4,7 @@
 
 #ifndef HYPERNATE_CONNECTION_H
 #define HYPERNATE_CONNECTION_H
+#include <cassert>
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -67,7 +68,7 @@ class connection {
    */
   vector<shared_ptr<persistent_object>> query(shared_ptr<const persistent_object> object,
                                               const fields_inclusion_mode inclusion_mode = fields_exclude,
-                                              const unordered_set<string>& fields = {},
+                                              const unordered_set<string>& fields = unordered_set<string>(),
                                               match_mode_t matchMode = match_mode_exact) {
     // make SQL statement
     auto table = find_table(object->class_name());
@@ -119,7 +120,7 @@ class connection {
           auto primary_value = object->get_value(object->_internal_table->get_primary_column()->field_name);
           query_sample->set_value(mapped_column->column_name, primary_value);
 
-          auto set_objects = this->query(query_sample, fields_include, {});
+          auto set_objects = this->query(query_sample, fields_include);
           std::unordered_set<shared_ptr<std::remove_pointer<decltype(registered_ptr.get())>::type>> mapped_set(set_objects.begin(), set_objects.end());
           one_query_result->set_objects(col->field_name, mapped_set);
         } else if (col->is_many_to_one_column()) {

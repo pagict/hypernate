@@ -8,7 +8,7 @@
 namespace hypernate
 {
 hyper_table::hyper_table(const json& table_config) {
-  table_name = table_config[key_table_name];
+  table_name = table_config[key_table_name].get<string>();
 
   for(auto col : table_config.at(key_table_columns)) {
     shared_ptr<hyper_column> column(new hyper_column(col));

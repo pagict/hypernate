@@ -4,6 +4,8 @@
 
 #include "connection.h"
 
+#include <system_error>
+
 namespace hypernate {
 sql::Driver* connection::_driver = get_driver_instance();
 
@@ -11,10 +13,10 @@ connection::connection(const json &configuration)
 {
   const json config = configuration[section_configuration];
   const json connection_section = config[section_connection];
-  _url = connection_section[key_url];
-  _username = connection_section[key_username];
-  _password = connection_section[key_password];
-  _schema = connection_section[key_schema];
+  _url = connection_section[key_url].get<string>();
+  _username = connection_section[key_username].get<string>();
+  _password = connection_section[key_password].get<string>();
+  _schema = connection_section[key_schema].get<string>();
 
   if (!_driver) {
     throw std::system_error(std::make_error_code(std::errc::no_such_device));

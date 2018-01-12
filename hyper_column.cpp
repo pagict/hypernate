@@ -9,13 +9,13 @@ namespace hypernate {
 hyper_column::hyper_column(const json &column_config)
     : is_primary(false)
 {
-  field_name = column_config.at(key_col_field);
-  object_type = column_config.at(key_col_class_type);
+  field_name = column_config.at(key_col_field).get<string>();
+  object_type = column_config.at(key_col_class_type).get<string>();
   if (column_config.find(key_col_column) != column_config.end()) {
-    column_name = column_config.at(key_col_column);
+    column_name = column_config.at(key_col_column).get<string>();
   }
   if (column_config.find(key_col_database_type) != column_config.end()) {
-    database_type = column_config.at(key_col_database_type);
+    database_type = column_config.at(key_col_database_type).get<string>();
   }
 
   is_primary = (column_config.find(key_col_primary) != column_config.end() && column_config[key_col_primary]);
